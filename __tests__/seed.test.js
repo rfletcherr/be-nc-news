@@ -3,6 +3,7 @@ const db = require('../db/connection')
 const request = require('supertest')
 const data = require('../db/data/test-data')
 const seed = require('../db/seeds/seed')
+const endpoints = require('../endpoints.json')
 
 beforeEach(() => seed(data));
 
@@ -28,6 +29,17 @@ test('GET 404: user enters invalid endpoint', () => {
     .then(({ body }) => {
         const { message } = body
         expect(message).toBe('Not found')
+    })
+  })
+})
+describe('/api', () => {
+  test('GET 200: Returns all available endpoints', () => {
+    return request(app)
+    .get('/api')
+    .expect(200)
+    .then(({ body }) => {
+      console.log(body);
+      expect(body).toEqual(endpoints)
     })
   })
 })
