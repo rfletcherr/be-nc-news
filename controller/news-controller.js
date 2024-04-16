@@ -1,4 +1,4 @@
-const { fetchTopics } = require('../models/news-model');
+const { fetchTopics, fetchArticle } = require('../models/news-model');
 const endpoints = require('../endpoints.json');
 
 function getEndpoints(req, res, next) {
@@ -12,4 +12,12 @@ const getTopics = (request, response, next) => {
     }).catch(next);
 };
 
-module.exports = { getTopics, getEndpoints };
+function getArticle(req, res, next) {
+    const { article_id } = req.params
+    return fetchArticle(article_id)
+    .then((article) =>{
+        res.status(200).send({ article })
+    }).catch(next)
+}
+
+module.exports = { getTopics, getEndpoints, getArticle };
