@@ -87,3 +87,24 @@ describe('/api/articles', () => {
   })
 })
 })
+describe('GET /api/articles/:article_id/comments', () => {
+  test('GET 200: responds with an array with comments for the given id', () => {
+      return request(app)
+      .get("/api/articles/1/comments")
+      .expect(200)
+      .then(({ body })=>{
+          const { comments } = body.comments
+          expect(comments.length).toBe(11)
+          comments.forEach((comment) => {
+            expect(comment).toMatchObject({
+                  comment_id: expect.any(Number),
+                  votes: expect.any(Number),
+                  created_at: expect.any(String),
+                  author: expect.any(String),
+                  body: expect.any(String),
+                  article_id: 1
+              })
+          })
+      })
+  })
+})
