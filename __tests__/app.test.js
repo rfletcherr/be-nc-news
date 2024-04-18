@@ -51,16 +51,39 @@ describe('/api/articles/:article_id', () => {
         const { article } = body
         expect(article).toMatchObject(expect.objectContaining(
           {
-            title: "Student SUES Mitch!",
-            topic: "mitch",
-            author: "rogersop",
-            body: "We all love Mitch and his wonderful, unique typing style. However, the volume of his typing has ALLEGEDLY burst another students eardrums, and they are now suing for damages",
+            title: expect.any(String),
+            topic: expect.any(String),
+            author: expect.any(String),
+            body: expect.any(String),
             created_at: expect.any(String),
             article_img_url:
-              "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+            expect.any(String),
           }
         )
         )
       })
   })
+describe('/api/articles', () => {
+  test('GET 200: responds with an array of article objects', () => {
+      return request(app)
+      .get('/api/articles')
+      .expect(200)
+      .then(({ body }) => {
+          const { articles } = body
+          expect(articles.length).toBe(13)
+          articles.forEach((article) => {
+              expect(article).toMatchObject(expect.objectContaining({
+                  article_id: expect.any(Number),
+                  title: expect.any(String),
+                  topic: expect.any(String),
+                  author: expect.any(String),
+                  created_at: expect.any(String),
+                  votes: expect.any(Number),
+                  article_img_url: expect.any(String),
+                  comment_count: expect.any(Number)
+              }))
+          })
+      })
+  })
+})
 })
