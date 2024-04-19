@@ -57,54 +57,73 @@ describe('/api/articles/:article_id', () => {
             body: expect.any(String),
             created_at: expect.any(String),
             article_img_url:
-            expect.any(String),
+              expect.any(String),
           }
         )
         )
       })
   })
-describe('/api/articles', () => {
-  test('GET 200: responds with an array of article objects', () => {
+  describe('/api/articles', () => {
+    test('GET 200: responds with an array of article objects', () => {
+      return request(app)
+        .get('/api/articles')
+        .expect(200)
+        .then(({ body }) => {
+          const { articles } = body
+          expect(articles.length).toBe(13)
+          articles.forEach((article) => {
+            expect(article).toMatchObject(expect.objectContaining({
+              article_id: expect.any(Number),
+              title: expect.any(String),
+              topic: expect.any(String),
+              author: expect.any(String),
+              created_at: expect.any(String),
+              votes: expect.any(Number),
+              article_img_url: expect.any(String),
+              comment_count: expect.any(Number)
+            }))
+          })
+        })
+    })
+    test('GET 200: responds with the array in descending order', () => {
       return request(app)
       .get('/api/articles')
       .expect(200)
       .then(({ body }) => {
-          const { articles } = body
-          expect(articles.length).toBe(13)
-          articles.forEach((article) => {
-              expect(article).toMatchObject(expect.objectContaining({
-                  article_id: expect.any(Number),
-                  title: expect.any(String),
-                  topic: expect.any(String),
-                  author: expect.any(String),
-                  created_at: expect.any(String),
-                  votes: expect.any(Number),
-                  article_img_url: expect.any(String),
-                  comment_count: expect.any(Number)
-              }))
-          })
+        const { articles } = body
+        expect(articles).toBeSortedBy('created_at', { descending: true })
       })
+
+    })
   })
-})
 })
 describe('GET /api/articles/:article_id/comments', () => {
   test('GET 200: responds with an array with comments for the given id', () => {
-      return request(app)
+    return request(app)
       .get("/api/articles/1/comments")
       .expect(200)
-      .then(({ body })=>{
-          const { comments } = body.comments
-          expect(comments.length).toBe(11)
-          comments.forEach((comment) => {
-            expect(comment).toMatchObject({
-                  comment_id: expect.any(Number),
-                  votes: expect.any(Number),
-                  created_at: expect.any(String),
-                  author: expect.any(String),
-                  body: expect.any(String),
-                  article_id: 1
-              })
+      .then(({ body }) => {
+        const { comments } = body.comments
+        expect(comments.length).toBe(11)
+        comments.forEach((comment) => {
+          expect(comment).toMatchObject({
+            comment_id: expect.any(Number),
+            votes: expect.any(Number),
+            created_at: expect.any(String),
+            author: expect.any(String),
+            body: expect.any(String),
+            article_id: 1
           })
+          })
+        })
       })
   })
+  test('GET200: responds with newest comments first', () => {
+    return request(app)
+      .get("/api/articles/1/comments")
+      .expect(200)
+      .then(({ body }) => {
+        const { comments } = body.comments
+        expect(comments).toBeSortedBy('created_at', { descending: true })
+      })
 })
