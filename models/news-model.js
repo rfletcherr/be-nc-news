@@ -61,8 +61,15 @@ const checkArticleExists = (article_id) => {
                 return true
             }
         });
-}
+    }
+const insertComment = (article_id, body) => {
+        return db.query(`INSERT INTO comments(article_id, author, body)
+        VALUES ($1, $2, $3) 
+        RETURNING *;`, [article_id, body.username, body.body ])
+        .then(({ rows }) => {
+            return rows[0]
+        })
+    }
 
 
-
-module.exports = { fetchTopics, fetchArticle, fetchAllArticles, fetchComments, checkArticleExists };
+module.exports = { fetchTopics, fetchArticle, fetchAllArticles, fetchComments, checkArticleExists, insertComment};

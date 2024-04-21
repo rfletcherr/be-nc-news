@@ -127,3 +127,25 @@ describe('GET /api/articles/:article_id/comments', () => {
         expect(comments).toBeSortedBy('created_at', { descending: true })
       })
 })
+test.only('POST 201: responds with successful created message when post is successfully made', () => {
+  const newComment = {
+      username: "icellusedkars",
+      body: "Replacing the quiet elegance of the dark suit and tie with the casual indifference of these muted earth tones is a form of fashion suicide, but, uh, call me crazy — onyou it works."
+  }
+  return request(app)
+  .post('/api/articles/3/comments')
+  .send(newComment)
+  .expect(201)
+  .then(({ body }) => {
+      const { comment } = body
+      expect(comment).toMatchObject({
+          comment_id: expect.any(Number),
+          votes: expect.any(Number),
+          created_at: expect.any(String),
+          author: expect.any(String),
+          body: expect.any(String),
+          article_id: 3,
+          body: "Replacing the quiet elegance of the dark suit and tie with the casual indifference of these muted earth tones is a form of fashion suicide, but, uh, call me crazy — onyou it works."
+  })
+  })
+})
