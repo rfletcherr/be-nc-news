@@ -70,6 +70,17 @@ const insertComment = (article_id, body) => {
             return rows[0]
         })
     }
+const insertArticle = (newVotes, article_id) => {
+        return db.query(`UPDATE articles SET votes= votes + $1
+        WHERE article_id=$2
+        RETURNING *;`, [newVotes, article_id])
+        .then(({ rows }) => {
+            if(!rows.length) {
+                return Promise.reject({status: 400, message: 'Not found'})
+            }
+            return rows[0]
+        })
+    }
 
 
-module.exports = { fetchTopics, fetchArticle, fetchAllArticles, fetchComments, checkArticleExists, insertComment};
+module.exports = { fetchTopics, fetchArticle, fetchAllArticles, fetchComments, checkArticleExists, insertComment, insertArticle};

@@ -1,4 +1,4 @@
-const { fetchTopics, fetchArticle, fetchAllArticles, fetchComments, checkArticleExists, insertComment} = require('../models/news-model');
+const { fetchTopics, fetchArticle, fetchAllArticles, fetchComments, checkArticleExists, insertComment, insertArticle} = require('../models/news-model');
 const endpoints = require('../endpoints.json');
 
 function getEndpoints(req, res, next) {
@@ -40,5 +40,13 @@ function postComment(req, res, next) {
         res.status(201).send({ comment })
     }).catch(next)              
 }
+function patchArticle(req, res, next) {
+    const { article_id } = req.params
+    const { inc_votes } = req.body
+    insertArticle(article_id, inc_votes)
+    .then((article) => {
+        res.status(200).send({ article })
+    }).catch(next)
+}
 
-module.exports = { getTopics, getEndpoints, getArticle, getAllArticles, getComments, postComment};
+module.exports = { getTopics, getEndpoints, getArticle, getAllArticles, getComments, postComment, patchArticle};    
