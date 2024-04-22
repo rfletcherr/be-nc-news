@@ -167,3 +167,19 @@ test("PATCH 200: responds with updated article and amended vote count", () => {
       });
     });
 });
+describe('/api/comments/:comment_id', () => {
+  test('DELETE 204: deletes comment matching given comment_id', () => {
+      return request(app)
+      .delete('/api/comments/1')
+      .expect(204)
+  })
+  test('DELETE 400: responds with 400 error if given comment_id is invalid', () => {
+    return request(app)
+    .delete(`/api/comments/aasdasf`)
+    .expect(400)
+    .then(({ body }) => {
+        const { message } = body
+        expect(message).toBe('Not found')
+    })
+})
+})

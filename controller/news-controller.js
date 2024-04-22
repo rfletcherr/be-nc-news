@@ -1,4 +1,4 @@
-const { fetchTopics, fetchArticle, fetchAllArticles, fetchComments, checkArticleExists, insertComment, insertArticle} = require('../models/news-model');
+const { fetchTopics, fetchArticle, fetchAllArticles, fetchComments, checkArticleExists, insertComment, insertArticle, commentDeletion} = require('../models/news-model');
 const endpoints = require('../endpoints.json');
 
 function getEndpoints(req, res, next) {
@@ -48,5 +48,15 @@ function patchArticle(req, res, next) {
         res.status(200).send({ article })
     }).catch(next)
 }
+function deleteComment(req, res, next) {
+    const { comment_id } = req.params
+    if (isNaN(comment_id)) {
+        return res.status(400).send({ message: 'Not found' });
+    }
+    commentDeletion(comment_id)
+    .then(() => {
+        res.status(204).send()
+    }).catch(next)
+}
 
-module.exports = { getTopics, getEndpoints, getArticle, getAllArticles, getComments, postComment, patchArticle};    
+module.exports = { getTopics, getEndpoints, getArticle, getAllArticles, getComments, postComment, patchArticle, deleteComment};    
