@@ -15,25 +15,34 @@ const fetchArticle = (article_id) => {
             return rows[0];
         });
 }
-const fetchAllArticles = () => {
-    return db.query(`SELECT 
-    articles.author,
-    articles.title, 
-    articles.article_id,
-    articles.topic,
-    articles.created_at,
-    articles.votes,
-    articles.article_img_url,
-    COUNT(comment_id) :: INT AS comment_count
-    FROM articles
-    LEFT JOIN comments
-    ON comments.article_id = articles.article_id
-    GROUP BY articles.article_id
-    ORDER BY articles.created_at DESC
-    ;`).then(({ rows }) => {
-        return { articles: rows }
-    })
-}
+const fetchAllArticles = (topic, sort_by='created_at', order='DESC') => {
+    let sqlQuery = `SELECT
+        articles.article_id,
+        articles.title,
+        articles.topic,
+        articles.author,
+        articles.created_at,
+        articles.votes,
+        articles.article_img_url,
+        COUNT(comments.article_id)::INT AS comment_count
+        FROM articles
+        LEFT JOIN comments
+        ON articles.article_id = comments.article_id `;
+
+    let queryVals = [];
+
+    if (topic) {
+        sqlQuery += `WHERE articles.topic = $1 `;
+        queryVals.push(topic);
+    }
+
+    sqlQuery += `GROUP BY articles.article_id ORDER BY ${sort_by} ${order};`;
+
+    return db.query(sqlQuery, queryVals)
+    .then(({ rows }) => {
+        return { articles: rows };
+    });
+};
 
 const fetchComments = (article_id) => {
     return db.query(
@@ -94,6 +103,13 @@ const commentDeletion = (comment_id) => {
                 return rows
             })
         }
+const fetchUsers = () => {
+    return db.query(`SELECT * FROM users`)
+    .then(({ rows }) => {
+        return rows
+    })
+ }
+
         
 
-module.exports = { fetchTopics, fetchArticle, fetchAllArticles, fetchComments, checkArticleExists, insertComment, insertArticle, commentDeletion};
+module.exports = { fetchTopics, fetchArticle, fetchAllArticles, fetchComments, checkArticleExists, insertComment, insertArticle, commentDeletion, fetchUsers};
