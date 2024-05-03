@@ -15,13 +15,25 @@ describe("/api/topics", () => {
     return request(app)
       .get("/api/topics")
       .expect(200)
-      .then(({ body: { topics } }) => {
+      .then((response) => {
+        const { topics } = response.body
+        expect(topics.length).toBe(3)
         topics.forEach((topic) => {
           expect(typeof topic.description).toBe("string");
           expect(typeof topic.slug).toBe("string");
         });
       });
   });
+  describe('/api', () => {
+    test('GET 200: Returns all available endpoints', () => {
+      return request(app)
+      .get('/api')
+      .expect(200)
+      .then(({ body }) => {
+        expect(body).toEqual({endpoints})
+      })
+    })
+  })
   test('GET 404: user enters invalid endpoint', () => {
     return request(app)
       .get("/api/invalidURL")
@@ -32,19 +44,9 @@ describe("/api/topics", () => {
       })
   })
 })
-describe('/api', () => {
-  test('GET 200: Returns all available endpoints', () => {
-    return request(app)
-      .get('/api')
-      .expect(200)
-      .then(({ body }) => {
-        expect(body).toEqual(endpoints)
-      })
-  })
-})
-describe('/api/articles/:article_id', () => {
-  test('GET 200: responds with article that corresponds the article_id', () => {
-    return request(app)
+  describe('/api/articles/:article_id', () => {
+    test('GET 200: responds with article that corresponds the article_id', () => {
+      return request(app)
       .get('/api/articles/4')
       .expect(200)
       .then(({ body }) => {
@@ -127,6 +129,26 @@ describe('GET /api/articles/:article_id/comments', () => {
         expect(comments).toBeSortedBy('created_at', { descending: true })
       })
 })
+test('GET 404: responds with 404 error when article ID is invalid', () => {
+  return request(app)
+    .get('/api/articles/invalid_id')
+    .expect(400)
+    .then(({ body }) => {
+      const { message } = body;
+      expect(message).toBe('Not found');
+    });
+});
+
+test('GET 404: responds with 404 error when article does not exist', () => {
+  return request(app)
+    .get('/api/articles/9999')
+    .expect(404)
+    .then(({ body }) => {
+      const { message } = body;
+      expect(message).toBe('Not found');
+    });
+});
+
 test('POST 201: responds with given comment where the author is the username', () => {
   const newComment = {
       username: "icellusedkars",
@@ -162,11 +184,35 @@ test("PATCH 200: responds with updated article and amended vote count", () => {
         author: expect.any(String),
         body: expect.any(String),
         created_at: expect.any(String),
-        votes: expect.any(Number),
+        votes: 101,
         article_img_url: expect.any(String),
       });
     });
 });
+test('GET 200: responds with array matching topic query', () => {
+  const topic = 'mitch';
+  
+  return request(app)
+    .get(`/api/articles?topic=${topic}`) 
+    .expect(200)
+    .then(({ body }) => {
+      const { articles } = body
+      expect(articles.length).toBe(12)
+      articles.forEach((article) => {
+        expect(article).toMatchObject(
+          {
+              article_id: expect.any(Number),
+              title: expect.any(String),
+              topic: "mitch",
+              author: expect.any(String),
+              created_at: expect.any(String),
+              votes: expect.any(Number),
+              article_img_url:
+              expect.any(String),
+      });
+    });
+});
+})
 describe('/api/comments/:comment_id', () => {
   test('DELETE 204: deletes comment matching given comment_id', () => {
       return request(app)
@@ -181,6 +227,11 @@ describe('/api/comments/:comment_id', () => {
         const { message } = body
         expect(message).toBe('Not found')
     })
+})
+test('DELETE 400: responds with error message when comment_id not found', () => {
+  return request(app)
+  .delete('/api/comments/12732')
+  .expect(404)
 })
 })
 describe('/api/users', () => {

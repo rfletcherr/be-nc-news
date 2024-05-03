@@ -2,7 +2,7 @@ const { fetchTopics, fetchArticle, fetchAllArticles, fetchComments, checkArticle
 const endpoints = require('../endpoints.json');
 
 function getEndpoints(req, res, next) {
-    return res.status(200).send(endpoints);
+    return res.status(200).send({ endpoints });
 }
 
 const getTopics = (request, response, next) => {
@@ -13,14 +13,22 @@ const getTopics = (request, response, next) => {
 };
 
 function getArticle(req, res, next) {
-    const { article_id } = req.params
-    return fetchArticle(article_id)
-    .then((article) =>{
-        res.status(200).send({ article })
-    }).catch(next)
+    const { article_id } = req.params;
+    fetchArticle(article_id)
+    .then((article) => {
+        res.status(200).send({ article });
+    })
+    .catch((error) => {
+        if (error.status === 404) {
+            res.status(404).send({ message: error.message });
+        } else {
+            next(error);
+        }
+    });
 }
 function getAllArticles(req, res, next) {
-    fetchAllArticles()
+    const { topic } = req.query
+    fetchAllArticles(topic)
     .then((articles) => { 
         res.status(200).send(articles);
     }).catch(next);
